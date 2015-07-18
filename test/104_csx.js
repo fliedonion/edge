@@ -106,10 +106,17 @@ describe('edge-cs', function () {
     });
 
     it('fails with malformed literal lambda', function () {
+        var jpCs1525Hex = 'e381afe784a1e58ab9e381a7e38199e38082'
+
+        var errMsgRegExp = new RegExp(
+                "Invalid expression term '=>'|Unexpected symbol `=>'"
+                + "|" + "'=>' " + (new Buffer(jpCs1525Hex, 'hex')).toString()
+            )
+    
         assert.throws(
             function () { edge.func('async_foo (input) => { return "Hello, " + input.ToString(); }'); },
             function (error) {
-                if ((error instanceof Error) && error.message.match(/Invalid expression term '=>'|Unexpected symbol `=>'/)) {
+                if ((error instanceof Error) && error.message.match(errMsgRegExp)) {
                     return true;
                 }
                 return false;
@@ -119,6 +126,15 @@ describe('edge-cs', function () {
     });
 
     it('fails with malformed class in function', function () {
+        var jpCs1518Hex = 'e382afe383a9e382b9e38081e38387e383aae382b2e383bce38388e38081e58897e68c99e59'
+                        + 'e8be38081e382a4e383b3e382bfe383bce38395e382a7e382a4e382b920e381bee3819fe381af'
+                        + 'e6a78be980a0e4bd93e3818ce5bf85e8a681e381a7e38199e38082'
+
+        var errMsgRegExp = new RegExp(
+                "Expected class, delegate, enum, interface, or|expecting `class', `delegate', `enum', `interface', `partial', or `struct'"
+                + "|" + (new Buffer(jpCs1518Hex, 'hex')).toString()
+            )
+
         assert.throws(
             function () {
                 edge.func(function () {/* 
@@ -134,7 +150,7 @@ describe('edge-cs', function () {
                 */});
             },
             function (error) {
-                if ((error instanceof Error) && error.message.match(/Expected class, delegate, enum, interface, or|expecting `class', `delegate', `enum', `interface', `partial', or `struct'/)) {
+                if ((error instanceof Error) && error.message.match(errMsgRegExp)) {
                     return true;
                 }
                 return false;
@@ -169,6 +185,13 @@ describe('edge-cs', function () {
     });
 
     it('fails when Startup class is missing', function () {
+        var jpPartBufferPre = new Buffer('e59e8b','hex');
+        var jpPartBufferSuf = new Buffer('e38292e8aaade381bfe8bebce38281e381bee3819be38293e381a7e38197e3819fe38082','hex');
+        var errMsgRegExp = new RegExp(
+                "Could not load type 'Startup'"
+                + "|" + jpPartBufferPre.toString() + " 'Startup' " + jpPartBufferSuf.toString()
+            );
+    
         assert.throws(
             function () {
                 edge.func(function () {/* 
@@ -184,7 +207,7 @@ describe('edge-cs', function () {
                 */});
             },
             function(error) {
-                if ( (error instanceof Error) && error.message.match(/Could not load type 'Startup'/)) {
+                if ( (error instanceof Error) && error.message.match(errMsgRegExp)) {
                     return true;
                 }
                 return false;

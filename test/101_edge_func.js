@@ -77,6 +77,14 @@ describe('edge.func', function () {
 	});
 
 	it('fails with assemblyFile and nonexisting type name', function () {
+		var jpPartBufferPre = new Buffer('e59e8b','hex');
+		var jpPartBufferSuf = new Buffer('e38292e8aaade381bfe8bebce38281e381bee3819be38293e381a7e38197e3819fe38082','hex');
+		var errMsgRegExp = new RegExp(
+				"Could not load type 'Edge.Tests.idontexist'"
+				+ "|" + 
+				jpPartBufferPre.toString() + " 'Edge.Tests.idontexist' " + jpPartBufferSuf.toString()
+			);
+			
 		assert.throws(
 			function () {
 				edge.func({
@@ -84,7 +92,7 @@ describe('edge.func', function () {
 					typeName: 'Edge.Tests.idontexist'
 				});
 			},
-			/Could not load type 'Edge.Tests.idontexist'/
+			errMsgRegExp
 		);
 	});
 
